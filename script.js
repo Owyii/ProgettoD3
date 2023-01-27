@@ -8,6 +8,7 @@ let pointsColor1 = '#87CEFA' // the colour of one of the Countries
 let pointsColor2 = '#90EE90' // the colour of one of the Countries
 let textColor = '#194d30'
 
+
 // in dataset.js you see that the data is in comma separated values format. 
 // this is a way to decode it by also expliciting the types, so that the d3 dataset is correctly made
 const data = d3.csvParse(dataset, d => {
@@ -20,7 +21,7 @@ const data = d3.csvParse(dataset, d => {
 		continent : d.continent,
 		cum14 : +d.cum14daysCasesPer100000
 	}
-})
+});
 
 // sorting the dataset by date
 data.sort((a, b) => d3.ascending(a.date, b.date))
@@ -62,11 +63,18 @@ svg.append("path")
 	);
 
 var testfunc = function(d){
-	//console.log(d.target.__data__.Day)
-	var todo_item = []
-	const htmlcode = data.map(data => `<li>${data.cases}</li>`).join('');
+	var day = d.target.__data__.Day
+	//var todo_item = data.filter(c => {return c.date ===day})
+	var test2 = d3.filter(data,function(d){return d.date.getTime() === day.getTime()})
+	test2.sort((a, b) => d3.descending(a.cases, b.cases))
+	const htmlcode = `<li></li><li style="font-weight: 600;"><div class="left">TOTALE</div><div class="right">${groupdata.find(d => d.Day === day).Cases}</div></li>` +
+		`<li></li><li style="font-weight: 700;"><div class="left">Paese</div><div class="right">Casi</div></li>` +
+		test2.map(data => `<li><div class="left">${data.country}</div><div class="right">${data.cases}</div></li>`).join('');
+	var datefin = [day.getDate(), day.getMonth() + 1, day.getFullYear()].join(' - ')
+	//console.log(test2)
+	//console.log(day)
 	
-	document.getElementById("info").innerHTML = '<ul id:"list">' + htmlcode + '</ul>'
+	document.getElementById("info").innerHTML = '<ul id:"list">' + `<li style="font-weight: 700;">${datefin}</li>` + htmlcode + '</ul>'
 }
 
 svg.selectAll(".dot")

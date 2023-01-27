@@ -48,6 +48,12 @@ svg {
 	background-color: #FFF;
 	overflow: hidden;
 	overflow-y: scroll;
-	max-height: 400px;
-	width: 200px;
+	max-height: 600px;
+	width: 400px;
+}
+.left {
+    float: left;
+}
+.right {
+    float: right;
 }
