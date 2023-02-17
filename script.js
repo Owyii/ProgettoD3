@@ -81,8 +81,8 @@ var testfunc = function(d){
 	}
 	test2.sort((a, b) => d3.descending(a.cases, b.cases))
 	const htmlcode = `<li></li><li style="font-weight: 600;"><div class="left">TOTALE</div><div class="right">${groupdata.find(d => d.Day === day).Cases}</div></li>` +
-		`<li></li><li style="font-weight: 700;"><div class="left">Paese</div><div class="right">Casi</div></li>` +
-		test2.map(data => `<li><button class="left" id="list_button" onclick="selectplace(this)">${data.country}</button><div class="right">${data.cases}</div></li>`).join('');
+		`<li></li><li style="font-weight: 700;"><div class="left">Paese</div><div class="right">Casi</div></li><li></li>` +
+		test2.map(data => `<li><button class="left_button" id="list_button" onclick="selectplace(this)">${data.country}</button><div class="right">${data.cases}</div></li>`.trimEnd()).join("");;
 	var datefin = [day.getDate(), day.getMonth() + 1, day.getFullYear()].join(' - ')
 	//console.log(test2)
 	//console.log(day)
@@ -101,7 +101,7 @@ svg.selectAll(".dot")
 
 
 function filter_data(continent){
-	if (current != continent){
+	if (current != continent && continent != ""){
 		var data_continent = d3.filter(data,function(d){return d.continent === continent})
 		current = continent
 
@@ -140,6 +140,39 @@ function filter_data(continent){
 			.on("click",testfunc)
 
 	}
+	else if(current != continent && continent == ""){
+		current = continent
+		var groupdata = d3.rollups(
+			data,
+			xs => d3.sum(xs, x => x.cases),
+			d => d.date
+		)
+		.map(([k,v]) => ({Day: k, Cases: v}))
+
+		svg.selectAll("circle").remove()
+		svg.selectAll("#data_line").remove()
+
+		svg.append("path")
+			.datum(groupdata)
+			.attr("fill","none")
+			.attr("stroke","steelblue")
+			.attr("stroke-width", 1.5)
+			.attr("id", "data_line")
+			.attr("d", d3.line()
+				.x(function(d) { return xAxis(d.Day) })
+				.y(function(d) { return yAxis(d.Cases) })
+			);
+
+		svg.selectAll(".dot")
+			.data(groupdata)
+			.join("circle") // enter append
+				.attr("class", function(d){return "dot" + d.Cases})
+				.attr("r", "3") // radius
+				.attr("cx", d=> xAxis(new Date(d.Day)))   // center x passing through your xScale
+				.attr("cy", d=> yAxis(parseInt(d.Cases)))   // center y through your yScale
+			.on("click",testfunc)
+
+	}
 	else {
 		return 0
 	}
@@ -148,7 +181,7 @@ function filter_data(continent){
 var buttons = document.getElementsByClassName("select_button");
 for (var i = 0; i < buttons.length; i++) {
 	buttons[i].onclick = function() {
-	filter_data(this.id)
+		filter_data(this.id)
 	};
 }
 
@@ -160,10 +193,17 @@ function selectplace(i){
 	var place = d3.filter(data,function(d){return d.country === selected_place})
 	console.log(place)
 
+	var groupdata = d3.rollups(
+		place,
+		xs => d3.sum(xs, x => x.cases),
+		d => d.date
+	)
+	.map(([k,v]) => ({Day: k, Cases: v}))
+
 	// X asix
 	var Theight_2 = height_2 - padding
 	var xAxis_2 = d3.scaleTime()
-		.domain(d3.extent(place,function(d) {return d.Day}))
+		.domain(d3.extent(groupdata,function(d) {return d.Day}))
 		.range([0 + padding,width_2 - padding]);
 	svg_2.append("g")
 		.attr("transform", "translate(0," + Theight_2 + ")")
@@ -171,21 +211,30 @@ function selectplace(i){
 
 	// Y axis
 	var yAxis_2 = d3.scaleLinear()
-		.domain([0,d3.max(place,function(d){return +d.Cases})])
+		.domain([0,d3.max(groupdata,function(d){return +d.Cases})])
 		.range([height_2 - padding ,0 + padding ])
 	svg_2.append("g")
 		.attr("transform", "translate("+ padding +",0)")
 		.call(d3.axisLeft(yAxis_2));
 
 	svg_2.append("path")
-		.datum(place)
+		.datum(groupdata)
 		.attr("fill","none")
 		.attr("stroke","steelblue")
 		.attr("stroke-width", 1.5)
-		.attr("id", "data_line_due")
+		.attr("id", "data_line")
 		.attr("d", d3.line()
-		.x(function(d) { return xAxis_2(d.Day) })
-		.y(function(d) { return yAxis_2(d.Cases) })
+			.x(function(d) { return xAxis_2(d.Day) })
+			.y(function(d) { return yAxis_2(d.Cases) })
 		);
 
-}	
+	svg_2.selectAll(".dot")
+	.data(groupdata)
+	.join("circle") // enter append
+		.attr("class", function(d){return "dot" + d.Cases})
+		.attr("r", "3") // radius
+		.attr("cx", d=> xAxis_2(new Date(d.Day)))   // center x passing through your xScale
+		.attr("cy", d=> yAxis_2(parseInt(d.Cases)))   // center y through your yScale
+	.on("click",testfunc)
+
+}

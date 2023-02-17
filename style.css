@@ -6,17 +6,17 @@
 
 html {
 	font-size: 16px;
-	font-family: 'IBM Plex Sans', sans-serif;
+	font-family: 'Lato', sans-serif;
 }
 
 header {
     width: 100vw;
     height: 64px;
-    background-color: #3CB371;
+    background-color: #2842d7;
     position: fixed; 
     top: 0;
     left: 0;
-    color: #FFF;
+    color: #a0ddda;
     text-align: center;
     display: flex;
     justify-content: center; 
@@ -31,7 +31,7 @@ main{
 #info_uno {
 	width: 100vw;
 	height: calc(100vh - 64px); /* 100% of the window height minus the height of the header  */
-	background-color: #c6ecd6;
+	background-color: #c9fcc7;
 	/* position: fixed; */
 	top: 64px;
 	left: 0;
@@ -41,28 +41,46 @@ main{
 }
 
 #info_due {
-	background-color: #22a056;
+	background-color: #2842d7;
 }
 
 
 svg {
-	background-color: #FFF;
+	background-color: #a0ddda;
 }
 
 #space {
-	background-color: #3CB371;
+	background-color: #2842d7;
 }
 
 #info {
-	background-color: #FFF;
+	background-color: #a0ddda;
 	overflow: hidden;
 	overflow-y: scroll;
 	max-height: 600px;
 	width: 400px;
 }
+
 .left {
     float: left;
 }
+
 .right {
     float: right;
+}
+
+li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.select_button {
+	background-color: #a0ddda;
+	margin: 2px ;
+}
+
+.left_button {
+    float: left;
+	background-color: #a0ddda;
 }
