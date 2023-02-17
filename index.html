@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width, initial-scale=1'>
@@ -12,17 +13,28 @@
 	<script type='text/javascript' src='https://d3js.org/d3.v6.min.js'></script>
 	<link rel='stylesheet' href='style.css'>
 </head>
+
 <body>
 	<header>
-		<h1>Comparison of…</h1>
+		<button id="Asia" class="select_button">ASIA</button>
+		<button id="Europe" class="select_button">EUROPE</button>
+		<button id="America" class="select_button">AMERICA</button>
+		<button id="Africa" class="select_button">AFRICA</button>
+		<button id="Oceania" class="select_button">OCEANIA</button>
 	</header>
 	<main>
-			<svg id='chart' width='1400' height='600'></svg>
-			<svg id="space" width="20" height="600"></svg> 
-			<div id='info' width="400" height='600'></div> 
+			<div id="info_uno">
+				<svg id='chart' width='1400' height='600'></svg>
+				<svg id="space" width="20" height="600"></svg>
+				<div id='info' width="400" height='600'></div>
+			</div>
+			<div id="info_due">
+				<svg id='chart_due' width='1400' height='600'></svg>
+			</div>
 	</main>
 	<!-- loading the script -->
 	<script type='text/javascript' src='dataset.js'></script>
 	<script type='text/javascript' src='script.js'></script>
 </body>
+
 </html>

@@ -10,31 +10,40 @@ html {
 }
 
 header {
-	width: 100vw;
-	height: 64px;
-	background-color: #3CB371;
-	position: fixed; /* when scrolling, it remains fixed */
-	top: 0;
-	left: 0;
-	color: #FFF;
-	text-align: center;
-	/* flex is a simple way to center the items inside an element */
-	display: flex;
-	justify-content: center; /* horizontal centring */
-	align-items: center; /* vertical centring */
+    width: 100vw;
+    height: 64px;
+    background-color: #3CB371;
+    position: fixed; 
+    top: 0;
+    left: 0;
+    color: #FFF;
+    text-align: center;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
 }
 
-main {
+main{
+	display: flex;
+	flex-direction: column;
+}
+
+#info_uno {
 	width: 100vw;
 	height: calc(100vh - 64px); /* 100% of the window height minus the height of the header  */
 	background-color: #c6ecd6;
-	position: fixed;
+	/* position: fixed; */
 	top: 64px;
 	left: 0;
 	display: flex;
 	justify-content: center; 
 	align-items: center;
 }
+
+#info_due {
+	background-color: #22a056;
+}
+
 
 svg {
 	background-color: #FFF;
