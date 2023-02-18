@@ -1,3 +1,4 @@
+
 const svgEl = document.getElementById('chart')
 const width = svgEl.getAttribute('width')
 const height = svgEl.getAttribute('height')
@@ -24,25 +25,47 @@ const data = d3.csvParse(dataset, d => {
 	return {
 		date : new Date(+d.year, +d.month-1, +d.day),
 		cases : +d.cases, // + indicates a number (by default all vals are strings)
+		continent : d.continent,
 		deaths : +d.deaths,
 		country : d.country,
 		pop2019 : +d.pop2019,
-		continent : d.continent,
 		cum14 : +d.cum14daysCasesPer100000
 	}
 });
 
+
+
 // sorting the dataset by date
 data.sort((a, b) => d3.ascending(a.date, b.date))
 
-var groupdata = d3.rollups(
-	data,
-	xs => d3.sum(xs, x => x.cases),
-	d => d.date
-)
-.map(([k,v]) => ({Day: k, Cases: v}))
-//serve per mappare in un jarray, potrebbe non essere necessario
+//take day by day array and return grouped by week
+var getArrByWeek = function(data){
+	var first_day = 1577833200000
+	console.log(first_day)
 
+	return d3.rollups(
+		data,
+		xs => d3.sum(xs, x => x.cases),
+		d => {
+			time = d.date.getTime()
+			if (time < first_day){
+				return new Date(d.date.getFullYear(),d.date.getMonth(),d.date.getDate() + 1)
+			}
+			else {
+				var diff = time - first_day
+				diff = ( diff / 1000 / 60 / 60 / 24 ) % 7
+				return new Date(d.date.getFullYear(),d.date.getMonth(),d.date.getDate() - diff)
+			}
+		},
+		//d => d.date
+	)
+	.map(([d,c]) => ({Day: d,Cases: c}))
+}
+
+var groupdata = getArrByWeek(data)
+
+
+console.log(groupdata)
 
 // X asix
 var Theight = height - padding
@@ -54,6 +77,7 @@ svg.append("g")
 	.call(d3.axisBottom(xAxis));
 
 // Y axis
+console.log(groupdata)
 var yAxis = d3.scaleLinear()
 	.domain([0,d3.max(groupdata,function(d){return +d.Cases})])
 	.range([height - padding ,0 + padding ])
@@ -72,7 +96,7 @@ svg.append("path")
 	  .y(function(d) { return yAxis(d.Cases) })
 	);
 
-var testfunc = function(d){
+var testfunc = function(d,give_data){
 	var day = d.target.__data__.Day
 	//var todo_item = data.filter(c => {return c.date ===day})
 	var test2 = d3.filter(data,function(d){return d.date.getTime() === day.getTime()})
@@ -80,7 +104,10 @@ var testfunc = function(d){
 		test2 = d3.filter(test2,function(d){return d.continent === current})
 	}
 	test2.sort((a, b) => d3.descending(a.cases, b.cases))
-	const htmlcode = `<li></li><li style="font-weight: 600;"><div class="left">TOTALE</div><div class="right">${groupdata.find(d => d.Day === day).Cases}</div></li>` +
+	console.log("func")
+	console.log(give_data)
+	console.log(day)
+	const htmlcode = `<li></li><li style="font-weight: 600;"><div class="left">TOTALE</div><div class="right">${give_data.find(d => d.Day === day).Cases}</div></li>` +
 		`<li></li><li style="font-weight: 700;"><div class="left">Paese</div><div class="right">Casi</div></li><li></li>` +
 		test2.map(data => `<li><button class="left_button" id="list_button" onclick="selectplace(this)">${data.country}</button><div class="right">${data.cases}</div></li>`.trimEnd()).join("");;
 	var datefin = [day.getDate(), day.getMonth() + 1, day.getFullYear()].join(' - ')
@@ -97,7 +124,7 @@ svg.selectAll(".dot")
 		.attr("r", "3") // radius
 		.attr("cx", d=> xAxis(new Date(d.Day)))   // center x passing through your xScale
 		.attr("cy", d=> yAxis(parseInt(d.Cases)))   // center y through your yScale
-	.on("click",testfunc)
+	.on("click",(evento)=>(testfunc(evento,groupdata)))
 
 
 function filter_data(continent){
@@ -105,18 +132,30 @@ function filter_data(continent){
 		var data_continent = d3.filter(data,function(d){return d.continent === continent})
 		current = continent
 
-		groupdata = d3.rollups(
-			data_continent,
-			xs => d3.sum(xs, x => x.cases),
-			d => d.date
-		)
-		.map(([k,v]) => ({Day: k, Cases: v}))
-		//serve per mappare in un jarray, potrebbe non essere necessario
+		groupdata = getArrByWeek(data_continent)
 
 
 		// //clear the graph
 		svg.selectAll("circle").remove()
 		svg.selectAll("#data_line").remove()
+		svg.selectAll("g").remove()
+
+		var Theight = height - padding
+		var xAxis = d3.scaleTime()
+			.domain(d3.extent(groupdata,function(d) {return d.Day}))
+			.range([0 + padding,width - padding]);
+		svg.append("g")
+			.attr("transform", "translate(0," + Theight + ")")
+			.call(d3.axisBottom(xAxis));
+
+		// Y axis
+		console.log(groupdata)
+		var yAxis = d3.scaleLinear()
+			.domain([0,d3.max(groupdata,function(d){return +d.Cases})])
+			.range([height - padding ,0 + padding ])
+		svg.append("g")
+			.attr("transform", "translate("+ padding +",0)")
+			.call(d3.axisLeft(yAxis));
 
 		//rebuild the graph
 		svg.append("path")
@@ -137,7 +176,7 @@ function filter_data(continent){
 				.attr("r", "3") // radius
 				.attr("cx", d=> xAxis(new Date(d.Day)))   // center x passing through your xScale
 				.attr("cy", d=> yAxis(parseInt(d.Cases)))   // center y through your yScale
-			.on("click",testfunc)
+			.on("click",(evento)=>(testfunc(evento,groupdata)))
 
 	}
 	else if(current != continent && continent == ""){
@@ -151,6 +190,24 @@ function filter_data(continent){
 
 		svg.selectAll("circle").remove()
 		svg.selectAll("#data_line").remove()
+		svg.selectAll("g").remove()
+
+		var Theight = height - padding
+		var xAxis = d3.scaleTime()
+			.domain(d3.extent(groupdata,function(d) {return d.Day}))
+			.range([0 + padding,width - padding]);
+		svg.append("g")
+			.attr("transform", "translate(0," + Theight + ")")
+			.call(d3.axisBottom(xAxis));
+
+		// Y axis
+		console.log(groupdata)
+		var yAxis = d3.scaleLinear()
+			.domain([0,d3.max(groupdata,function(d){return +d.Cases})])
+			.range([height - padding ,0 + padding ])
+		svg.append("g")
+			.attr("transform", "translate("+ padding +",0)")
+			.call(d3.axisLeft(yAxis));
 
 		svg.append("path")
 			.datum(groupdata)
@@ -170,7 +227,7 @@ function filter_data(continent){
 				.attr("r", "3") // radius
 				.attr("cx", d=> xAxis(new Date(d.Day)))   // center x passing through your xScale
 				.attr("cy", d=> yAxis(parseInt(d.Cases)))   // center y through your yScale
-			.on("click",testfunc)
+			.on("click",(evento)=>(testfunc(evento,groupdata)))
 
 	}
 	else {
@@ -186,7 +243,7 @@ for (var i = 0; i < buttons.length; i++) {
 }
 
 function selectplace(i){
-
+	//ATTENZIONE, IL VECCHIO GRAFICO NON VIENE RIMOSSO
 	var selected_place = i.outerText
 	console.log(selected_place)
 
