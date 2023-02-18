@@ -15,7 +15,13 @@ let pointsColor1 = '#87CEFA' // the colour of one of the Countries
 let pointsColor2 = '#90EE90' // the colour of one of the Countries
 let textColor = '#194d30'
 var current = ""
-var isShowing = false
+let isShowing = false
+
+Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
 
 // in dataset.js you see that the data is in comma separated values format. 
 // this is a way to decode it by also expliciting the types, so that the d3 dataset is correctly made
@@ -23,9 +29,9 @@ const data = d3.csvParse(dataset, d => {
 	return {
 		date : new Date(+d.year, +d.month-1, +d.day),
 		cases : +d.cases, // + indicates a number (by default all vals are strings)
+		country : d.country,
 		continent : d.continent,
 		deaths : +d.deaths,
-		country : d.country,
 		pop2019 : +d.pop2019,
 		cum14 : +d.cum14daysCasesPer100000
 	}
@@ -117,10 +123,39 @@ var testfunc = function(d,give_data){
 	const htmlcode = `<li></li><li style="font-weight: 600;" margin-left="10px"><div class="left" id="totale">TOTALE</div><div class="right">${give_data.find(d => d.Day === day).Cases}</div></li>` +
 		`<li></li><li style="font-weight: 700;" margin-left="10px"><div class="left" id="paese">Paese</div><div class="right" id="casi">Casi</div></li><li></li>` +
 		test2.map(data => `<li><button class="left_button" id="list_button" onclick="selectplace(this)">${data.country}</button><div class="right">${data.cases}</div></li>`.trimEnd()).join("");;
+
 	const datefin = [day.getDate(), day.getMonth() + 1, day.getFullYear()].join(' - ')
-	const dateend = [day.getDate() + 7, day.getMonth() + 1, day.getFullYear()].join(' - ')
+	let end_date = day.addDays(7)
+	const dateend = [end_date.getDate(), end_date.getMonth() + 1, end_date.getFullYear()].join(' - ')
 	
-	document.getElementById("info").innerHTML = '<ul id:"list">' + `<li style="font-weight: 700;"> Dal ${datefin} al ${da}</li>` + htmlcode + '</ul>'
+	document.getElementById("info").innerHTML = '<ul id:"list">' + `<li style="font-weight: 700; text-align: center;"> Dal ${datefin} al ${dateend}</li>` + htmlcode + '</ul>'
+	document.getElementById("info").style.visibility = "visible";
+}
+
+//give total data when pressing a button
+function write_info(give_data){
+	give_data.sort((a,b) => d3.descending(a.Cases,b.Cases))
+	const htmlcode_info = `<li></li><li style="font-weight: 600;" margin-left="10px"><div class="left" id="totale">TOTALE</div><div class="right">${d3.sum(give_data,function(d){return +d.Cases})}</div></li>` +
+		`<li></li><li style="font-weight: 700;" margin-left="10px"><div class="left" id="paese">Paese</div><div class="right" id="casi">Casi</div></li><li></li>` +
+		give_data.map(data => `<li><button class="left_button" id="list_button" onclick="selectplace(this)">${data.Country}</button><div class="right">${data.Cases}</div></li>`.trimEnd()).join("");;
+
+	document.getElementById("info").innerHTML = '<ul id:"list">' + `<li style="font-weight: 700; text-align: center;"> Casi durante tutto il periodo </li>` + htmlcode_info + '</ul>'
+	document.getElementById("info").style.visibility = "visible";
+}
+
+// When i press the button in the header even the info change
+function continent_info(continent,give_data){
+	let list_states = give_data
+	if(continent != ""){
+		list_states = d3.filter(list_states,function(d){return d.continent === continent})
+	}
+	list_states = d3.rollups(
+		list_states,
+		xs => d3.sum(xs,x => x.cases),
+		d => d.country
+	)
+	.map(([p,c]) => ({Country:p,Cases: c}))
+	write_info(list_states)
 }
 
 // Function to create the graph based on the array that is passed
@@ -183,6 +218,7 @@ make_graph(svg,groupdata)
 
 //Function that based on the button pressed choose what information to display
 function filter_data(continent){
+	continent_info(continent,data)
 	if (current != continent && continent != ""){
 		var data_continent = d3.filter(data,function(d){return d.continent === continent})
 		current = continent
