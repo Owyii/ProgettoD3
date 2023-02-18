@@ -67,6 +67,18 @@ var groupdata = getArrByWeek(data)
 
 console.log(groupdata)
 
+svg.append("svg:defs")
+	.append("svg:marker")
+		.attr("id", "triangle")
+		.attr("refX", 6)
+		.attr("refY", 6)
+		.attr("markerWidth", 30)
+		.attr("markerHeight", 30)
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M 0 0 12 6 0 12 3 6")
+		.style("fill", "black");
+
 // X asix
 var Theight = height - padding
 var xAxis = d3.scaleTime()
@@ -107,8 +119,8 @@ var testfunc = function(d,give_data){
 	console.log("func")
 	console.log(give_data)
 	console.log(day)
-	const htmlcode = `<li></li><li style="font-weight: 600;"><div class="left">TOTALE</div><div class="right">${give_data.find(d => d.Day === day).Cases}</div></li>` +
-		`<li></li><li style="font-weight: 700;"><div class="left">Paese</div><div class="right">Casi</div></li><li></li>` +
+	const htmlcode = `<li></li><li style="font-weight: 600;" margin-left="10px"><div class="left" id="totale">TOTALE</div><div class="right">${give_data.find(d => d.Day === day).Cases}</div></li>` +
+		`<li></li><li style="font-weight: 700;" margin-left="10px"><div class="left" id="paese">Paese</div><div class="right" id="casi">Casi</div></li><li></li>` +
 		test2.map(data => `<li><button class="left_button" id="list_button" onclick="selectplace(this)">${data.country}</button><div class="right">${data.cases}</div></li>`.trimEnd()).join("");;
 	var datefin = [day.getDate(), day.getMonth() + 1, day.getFullYear()].join(' - ')
 	//console.log(test2)
