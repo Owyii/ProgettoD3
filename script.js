@@ -65,49 +65,54 @@ var getArrByWeek = function(data){
 
 var groupdata = getArrByWeek(data)
 
-console.log(groupdata)
+// svg.append("svg:defs").append("svg:marker")
+//     .attr("id", "arrowhead")
+// 	.attr("viewBox", "0 0 10 10")
+//     .attr("refX", 10)
+//     .attr("refY", 1)
+//     .attr("markerWidth", 12)
+//     .attr("markerHeight", 12)
+//     .attr("orient", "auto")
+//     .append("path")
+// 	.attr("d", "M 0 0 L 5 10 L 10 0");
 
-svg.append("svg:defs")
-	.append("svg:marker")
-		.attr("id", "triangle")
-		.attr("refX", 6)
-		.attr("refY", 6)
-		.attr("markerWidth", 30)
-		.attr("markerHeight", 30)
-		.attr("orient", "auto")
-		.append("path")
-		.attr("d", "M 0 0 12 6 0 12 3 6")
-		.style("fill", "black");
+// // X asix
+// var Theight = height - padding
+// var xAxis = d3.scaleTime()
+// 	.domain(d3.extent(groupdata,function(d) {return d.Day}))
+// 	.range([0 + padding,width - padding]);
+// svg.append("g")
+// 	.attr("transform", "translate(0," + Theight + ")")
+// 	.call(d3.axisBottom(xAxis))
 
-// X asix
-var Theight = height - padding
-var xAxis = d3.scaleTime()
-	.domain(d3.extent(groupdata,function(d) {return d.Day}))
-	.range([0 + padding,width - padding]);
-svg.append("g")
-	.attr("transform", "translate(0," + Theight + ")")
-	.call(d3.axisBottom(xAxis));
+// // Y axis
+// console.log(groupdata)
+// var yAxis = d3.scaleLinear()
+// 	.domain([0,d3.max(groupdata,function(d){return +d.Cases})])
+// 	.range([height - padding ,0 + padding ])
+// svg.append("g")
+// 	.attr("transform", "translate("+ padding +",0)")
+// 	.call(d3.axisLeft(yAxis))
+// 	.select("path").attr("marker-end", "url(#arrowhead)");
 
-// Y axis
-console.log(groupdata)
-var yAxis = d3.scaleLinear()
-	.domain([0,d3.max(groupdata,function(d){return +d.Cases})])
-	.range([height - padding ,0 + padding ])
-svg.append("g")
-	.attr("transform", "translate("+ padding +",0)")
-	.call(d3.axisLeft(yAxis));
+// svg.append("path")
+// 	.datum(groupdata)
+// 	.attr("fill","none")
+// 	.attr("stroke","steelblue")
+// 	.attr("stroke-width", 1.5)
+// 	.attr("id", "data_line")
+// 	.attr("d", d3.line()
+// 	  .x(function(d) { return xAxis(d.Day) })
+// 	  .y(function(d) { return yAxis(d.Cases) })
+// 	);
 
-svg.append("path")
-	.datum(groupdata)
-	.attr("fill","none")
-	.attr("stroke","steelblue")
-	.attr("stroke-width", 1.5)
-	.attr("id", "data_line")
-	.attr("d", d3.line()
-	  .x(function(d) { return xAxis(d.Day) })
-	  .y(function(d) { return yAxis(d.Cases) })
-	);
-
+// var xa = svg.append("g")
+// 	.attr("class", "y axis")
+// 	.attr("transform", "translate(0," + height + ")")      
+// 	.style("dominant-baseline", "central")
+// 	.call(yAxis);
+  
+//   xa.select("path").attr("marker-end", "url(#triangle)");
 
 //function to create the list on the right with all the information about the state
 var testfunc = function(d,give_data){
@@ -117,9 +122,7 @@ var testfunc = function(d,give_data){
 		test2 = d3.filter(test2,function(d){return d.continent === current})
 	}
 	test2.sort((a, b) => d3.descending(a.cases, b.cases))
-	console.log("func")
-	console.log(give_data)
-	console.log(day)
+
 	const htmlcode = `<li></li><li style="font-weight: 600;" margin-left="10px"><div class="left" id="totale">TOTALE</div><div class="right">${give_data.find(d => d.Day === day).Cases}</div></li>` +
 		`<li></li><li style="font-weight: 700;" margin-left="10px"><div class="left" id="paese">Paese</div><div class="right" id="casi">Casi</div></li><li></li>` +
 		test2.map(data => `<li><button class="left_button" id="list_button" onclick="selectplace(this)">${data.country}</button><div class="right">${data.cases}</div></li>`.trimEnd()).join("");;
@@ -162,6 +165,17 @@ function continent_info(continent,give_data){
 // there is no other parameter passed becouse the graph is always the same for the moment 
 function make_graph(element,new_data){
 
+	svg.append("svg:defs").append("svg:marker")
+		.attr("id", "arrowhead")
+		.attr("viewBox", "0 0 10 10")
+		.attr("refX", 10)
+		.attr("refY", 1)
+		.attr("markerWidth", 12)
+		.attr("markerHeight", 12)
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M 0 0 L 5 10 L 10 0");
+
 	// X axis
 	var Theight = height - padding
 	var xAxis = d3.scaleTime()
@@ -169,7 +183,8 @@ function make_graph(element,new_data){
 		.range([0 + padding,width - padding]);
 	element.append("g")
 		.attr("transform", "translate(0," + Theight + ")")
-		.call(d3.axisBottom(xAxis));
+		.call(d3.axisBottom(xAxis))
+		
 
 	// Y axis
 	var yAxis = d3.scaleLinear()
@@ -177,7 +192,10 @@ function make_graph(element,new_data){
 		.range([height - padding ,0 + padding ])
 	element.append("g")
 		.attr("transform", "translate("+ padding +",0)")
-		.call(d3.axisLeft(yAxis));
+		.call(d3.axisLeft(yAxis))
+		.select("path").attr("marker-end", "url(#arrowhead)");
+
+
 
 	//rebuild the graph
 	element.append("path")
@@ -191,6 +209,7 @@ function make_graph(element,new_data){
 			.y(function(d) { return yAxis(d.Cases) })
 		);
 
+
 	//rebuild the point
 	element.selectAll(".dot")
 		.data(new_data)
@@ -200,8 +219,9 @@ function make_graph(element,new_data){
 			.attr("cx", d=> xAxis(new Date(d.Day)))   // center x passing through your xScale
 			.attr("cy", d=> yAxis(parseInt(d.Cases)))   // center y through your yScale
 		.on("click",(evento)=>(testfunc(evento,new_data)))	
-
 }
+
+make_graph(svg,groupdata)
 
 // Remake the graph resetting the axis
 function remake_graph(element,new_data){
